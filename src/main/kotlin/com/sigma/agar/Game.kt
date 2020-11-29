@@ -16,7 +16,7 @@ import java.util.*
 class Game : GameLoop(), GameLoopListener {
 
     companion object {
-        const val FPS = 30
+        const val FPS = 60
         const val WORLD_WIDTH = 1500
         const val WORLD_HEIGHT = 1500
         const val TOTAL_COLORS = 10
