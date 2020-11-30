@@ -2,8 +2,8 @@ package com.sigma.agar
 
 import com.google.gson.Gson
 import com.sigma.agar.utils.protocol.ProtocolImpl
-import org.web.httpserver.Session
-import org.web.httpserver.handler.WebSocketHandler
+import org.webutil.httpserver.Session
+import org.webutil.httpserver.websocket.WebSocketHandler
 
 class GameWebSocket : WebSocketHandler() {
 
@@ -12,13 +12,13 @@ class GameWebSocket : WebSocketHandler() {
     }
 
     private val game = Game().apply {
-        set_protocol_data(ProtocolImpl(this@GameWebSocket))
+        protocol_data = ProtocolImpl(this@GameWebSocket)
         start()
     }
     private val gson = Gson()
 
     override fun onOpen(s: Session) {
-        game.join_player(s)
+        game.join(s)
     }
 
     override fun onClose(s: Session) {
@@ -29,7 +29,7 @@ class GameWebSocket : WebSocketHandler() {
     override fun onText(text: String, s: Session) {
         try {
             val msg = gson.fromJson(text, Message::class.java)
-            game.on_mouse_moved(msg.x, msg.y, s)
+            game.on_mouse_moved(msg.x.toInt(), msg.y.toInt(), s)
         } catch (e: Throwable) {
             close_session(s)
         }
@@ -38,9 +38,4 @@ class GameWebSocket : WebSocketHandler() {
     fun close_session(s: Session) {
         runCatching { s.close() }
     }
-
-    data class Message(
-        val x: Int,
-        val y: Int
-    )
 }

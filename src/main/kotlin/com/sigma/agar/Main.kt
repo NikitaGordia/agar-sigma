@@ -1,9 +1,9 @@
 package com.sigma.agar
 
-import org.web.httpserver.HttpRequest
-import org.web.httpserver.HttpResponse
-import org.web.httpserver.HttpServerImpl
-import org.web.httpserver.handler.WebServerHandler
+import org.webutil.httpserver.HttpRequest
+import org.webutil.httpserver.HttpResponse
+import org.webutil.httpserver.HttpServerImpl
+import org.webutil.httpserver.webserver.WebServerHandler
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -25,7 +25,7 @@ object Main {
 
     private fun run_server() = HttpServerImpl(8080).apply {
         httpListener = object : WebServerHandler() {
-            override fun onHttpRequest(httpRequest: HttpRequest): HttpResponse {
+            override fun handleQuery(p0: HttpRequest?): HttpResponse {
                 return HttpResponse.build(HttpResponse.Status.NOT_FOUND)
             }
 
@@ -33,6 +33,9 @@ object Main {
             override fun toStream(file: File): InputStream {
                 return FileInputStream(file)
             }
+        }.apply {
+            contentFolder = "web"
+            indexMap["/"] = "/index.html"
         }
         connect()
     }

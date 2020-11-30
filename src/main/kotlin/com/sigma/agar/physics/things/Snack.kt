@@ -7,7 +7,6 @@ class Snack(color: Int) : Thing(color, INIT_MASS) {
     }
 
     override fun collide_with(thing: Thing) {
-        // no implementation
     }
 
     override val type =  SNACK

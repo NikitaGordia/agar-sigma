@@ -1,6 +1,13 @@
 package com.sigma.agar.utils
 
 open class GameLoop {
+
+    companion object {
+        const val ROUND_DURATION_MS = 1000 * 60
+    }
+
+    var round_end_time_ms = 0L
+
     var current_fps = 0
         private set
     var listener: GameLoopListener? = null
@@ -24,6 +31,17 @@ open class GameLoop {
                         var fps_time: Long = 0
                         var frames = 0
                         while (!isInterrupted) {
+
+                            if (System.currentTimeMillis() > round_end_time_ms) {
+                                val is_first_launch = round_end_time_ms == 0L
+
+                                round_end_time_ms = System.currentTimeMillis() + ROUND_DURATION_MS
+
+                                if (!is_first_launch) {
+                                    listener?.reset_round()
+                                }
+                            }
+
                             last = start
                             start = System.nanoTime()
                             val sl = start - last
@@ -42,7 +60,6 @@ open class GameLoop {
                                 sleep(diff)
                             }
                         }
-                    } catch (_: Exception) {
                     } finally {
                         this@GameLoop.stop()
                     }
@@ -68,6 +85,7 @@ open class GameLoop {
     }
 
     interface GameLoopListener {
+        fun reset_round()
         fun update(dt: Float)
         fun render()
     }

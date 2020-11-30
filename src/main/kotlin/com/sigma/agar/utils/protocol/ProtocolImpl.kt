@@ -1,10 +1,10 @@
 package com.sigma.agar.utils.protocol
 
 import com.sigma.agar.GameWebSocket
-import com.sigma.agar.physics.entity.Thing
+import com.sigma.agar.physics.things.Thing
 import com.sigma.agar.utils.Serializer
 import com.sigma.agar.utils.Tuple
-import org.web.httpserver.Session
+import org.webutil.httpserver.Session
 import java.util.concurrent.Executors
 
 class ProtocolImpl(private val socket: GameWebSocket) : Protocol {
@@ -24,13 +24,13 @@ class ProtocolImpl(private val socket: GameWebSocket) : Protocol {
         }
     }
 
-    override fun dispatch(center: Tuple, width: Float, height: Float, things: List<Thing>, s: Session) {
-        var arr = ByteArray(1024)
+    override fun dispatch(center: Tuple, width: Float, height: Float, things: List<Thing>, end_time_ms: Long, s: Session) {
+        var arr = ByteArray(1024 + 512)
         var bit_offset = 0
-        bit_offset += write_int(arr, bit_offset, width.toInt())
-        bit_offset += write_int(arr, bit_offset, height.toInt())
         bit_offset += write_int(arr, bit_offset, center.x.toInt())
         bit_offset += write_int(arr, bit_offset, center.y.toInt())
+        bit_offset += write_int(arr, bit_offset, width.toInt())
+        bit_offset += write_int(arr, bit_offset, height.toInt())
 
         for (thing in things) {
             arr = ensureCapacity(arr, bit_offset, 16)
@@ -43,10 +43,15 @@ class ProtocolImpl(private val socket: GameWebSocket) : Protocol {
             bit_offset += write_int(arr, bit_offset, thing.position.x.toInt())
             bit_offset += write_int(arr, bit_offset, thing.position.y.toInt())
         }
-        sendAsync(arr, bit_offset, s)
+
+        bit_offset += write_int(arr, bit_offset, (end_time_ms / 1000).toInt())
+
+        println(bit_offset)
+
+        dispatch_async(arr, bit_offset, s)
     }
 
-    private fun sendAsync(arr: ByteArray, offset: Int, s: Session) {
+    private fun dispatch_async(arr: ByteArray, offset: Int, s: Session) {
         executor.execute {
             try {
                 val compressed = serializer.serialize(arr, 0, offset)
