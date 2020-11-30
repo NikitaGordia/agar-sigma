@@ -1,4 +1,4 @@
-package com.sigma.agar.physics.entity
+package com.sigma.agar.physics.things
 
 class Snack(color: Int) : Thing(color, INIT_MASS) {
 
@@ -11,4 +11,6 @@ class Snack(color: Int) : Thing(color, INIT_MASS) {
     }
 
     override val type =  SNACK
+
+    override val density = 0.025f
 }
